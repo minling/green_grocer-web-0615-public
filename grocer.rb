@@ -56,7 +56,11 @@ end
   # apply_coupons_hash
 
 def apply_clearance(cart:[])
-  # binding.pry
+  cart.each do |item|
+    if item[1][:clearance] == true
+      item[1][:price] = (item[1][:price] * 0.8).round(1)
+    end
+  end
 end
 
 def checkout(cart: [], coupons: [])
