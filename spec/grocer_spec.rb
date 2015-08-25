@@ -58,6 +58,7 @@ describe "Grocer" do
       end
 
       it "adds a new key, value pair to the cart hash called 'ITEM NAME W/COUPON'" do
+      
         expect(@avocado_result.keys).to include("AVOCADO W/COUPON")
       end
 
@@ -115,6 +116,7 @@ describe "Grocer" do
         cart = Array.new(4, cheese)
         3.times { cart << avocado }
         consolidated_cart = consolidate_cart(cart: cart)
+
         coupons = [find_coupon("AVOCADO"), find_coupon("CHEESE")]
 
         multiple_coupons = apply_coupons(cart: consolidated_cart, coupons: coupons)
@@ -144,6 +146,7 @@ describe "Grocer" do
         coupon = find_coupon("AVOCADO")
         consol_cart = consolidate_cart(cart: [avocado, avocado, avocado, avocado, avocado])
         two_coupon_result = apply_coupons(cart: consol_cart, coupons: [coupon, coupon])
+        # binding.pry
         expect(two_coupon_result["AVOCADO"][:count]).to eq(1)
         expect(two_coupon_result["AVOCADO W/COUPON"][:price]).to eq(5.00)
         expect(two_coupon_result["AVOCADO"][:price]).to eq(3.00)
