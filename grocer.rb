@@ -16,44 +16,48 @@ end
 
 def apply_coupons(cart:[], coupons:[])
     apply_coupons_hash = {}
-      coupon_items = [] # get coupon item names
-        coupons.each do |item|
-          coupon_items << item[:item]
-        end
     cart.each do |item|
-      name = item[0]
-      attributes = item[1]
-      num_of_coupon = 0 
-      coupon_price = 0 
-      coupons.each do |coupon_hash| #get num and cost of that particular item from coupons hash
-        if coupon_hash[:item] == name
-          num_of_coupon = coupon_hash[:num]
-          coupon_price = coupon_hash[:cost]
-        end
-      end
-      num_of_coupon #quantity of item required for coupon to work
-
-      if ((coupon_items.include?(name)) && (attributes[:count] >= num_of_coupon))
-      #for the current item, if the count is >= coupon quantity requirement
-      #decrease the item count and add the coupon hash 
-      quantity = (attributes[:count] / num_of_coupon) #item quantity/coupon quantity
-        apply_coupons_hash[name] = {:price => attributes[:price], :clearance => attributes[:clearance], :count =>(attributes[:count] - (num_of_coupon * quantity))}
-        apply_coupons_hash[name + ' W/COUPON'] = {:price => coupon_price, :clearance => attributes[:clearance], :count => quantity}
-      else #if no coupon for this item, then just add the existing item hash to apply_coupons_hash
-        apply_coupons_hash[name] = {:price => attributes[:price], :clearance => attributes[:clearance], :count => attributes[:count]}
+      item_hash = build_item_hash(item)
+      matching_coupon_for_item = coupons.detect {|coupon| coupon[:item] == item_hash[:name]}
+      if matching_coupon_for_item && can_apply_coupon?(item_hash, matching_coupon_for_item)
+        quantity = (item_hash[:count] / matching_coupon_for_item[:num]) 
+        apply_coupons_hash[item_hash[:name]] = {:price => item_hash[:price], :clearance => item_hash[:clearance], :count =>(item_hash[:count] - (matching_coupon_for_item[:num] * quantity))}
+        apply_coupons_hash[item_hash[:name] + ' W/COUPON'] = {:price => matching_coupon_for_item[:cost], :clearance => item_hash[:clearance], :count => quantity}
+      else 
+        apply_coupons_hash[item_hash[:name]] = {:price => item_hash[:price], :clearance => item_hash[:clearance], :count => item_hash[:count]}
       end
     end
     apply_coupons_hash
 end
-  # tried this but got erorr can't add a new key into hash during iteration
-  # cart.each do |item|
-  #    binding.pry
-  #   if item[0].include?(coupons[0][:item])
-  #     apply_coupons_hash << cart["AVOCADO W/COUPON"] = {:price => 5.0, :clearance => true, :count => 1}
-  #   end
-  # end
-  # binding.pry
-  # apply_coupons_hash
+
+# A. Coerce the data to the structure I want, forget the structure I have
+    # 1. One item, one element
+    # 2.  Represent single object either with an object, with a hash
+      # ['Avocado', {price: 2, count: 4}] => {name: 'Avocado', price: 2, count: 4}
+      # consider building ['Avocado' => {name: 'Avocado', count: }]
+# B. Make sure we use the correct iterators
+  # If I see an 'each' and then an 'if' => 'select' or 'detect'
+      # select is when i want to return a list (array)
+      # detect is if i want to just return the first, nil
+    # Beware of sandwiches
+       # arr = []
+       # arr.each do ||
+       # end 
+       # arr
+# C. Consider replacing comments with a method call
+    # cut and paste code to the body of the new method
+    # pass in the proper parameters
+    # call the method in place of the old code
+
+def can_apply_coupon?(item_hash, matching_coupon_for_item)
+  (item_hash[:count] >= matching_coupon_for_item[:num])
+end
+
+def build_item_hash(item_array)
+  item_hash = {}
+  item_hash[:name] = item_array.first
+  item_hash.merge!(item_array.last)
+end
 
 def apply_clearance(cart:[])
   cart.each do |item|
@@ -64,5 +68,22 @@ def apply_clearance(cart:[])
 end
 
 def checkout(cart: [], coupons: [])
-  # code here
+  consol_cart = consolidate_cart(cart: cart)
+  coupons_applied = apply_coupons(cart: consol_cart, coupons: coupons)
+  clearance_applied = apply_clearance(cart: coupons_applied)
+  total = []
+  clearance_applied.each do |item, attributes|
+    if attributes[:count] > 0 
+      # binding.pry
+    total << (attributes[:price] * attributes[:count])
+    end
+  end
+  # binding.pry
+  total_amount = total.inject(:+)
+  if total_amount >= 100
+    # binding.pry
+    total_amount = total_amount * 0.9
+  end
+  total_amount
 end
+

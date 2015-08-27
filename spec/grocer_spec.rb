@@ -26,6 +26,7 @@ describe "Grocer" do
     it "adds a count of one to each item when there are no duplicates" do
       cart = [find_item('TEMPEH'), find_item('PEANUTBUTTER'), find_item('ALMONDS')]
       result = consolidate_cart(cart: cart)
+      # binding.pry
       result.each do |item, attributes|
         expect(attributes.keys).to include(:count)
         expect(attributes[:count]).to eq(1)
@@ -181,7 +182,7 @@ describe "Grocer" do
       it "calls on #consolidate_cart before calculating the total for one item" do
         cart = [find_item('BEETS')]
         result = consolidate_cart(cart: cart)
-
+        # binding.pry
         expect(self).to receive(:consolidate_cart).with(cart: cart).and_return(result)
         expect(checkout(cart: cart, coupons: [])).to eq(2.50)
       end
@@ -221,7 +222,7 @@ describe "Grocer" do
         consolidated = consolidate_cart(cart: cart)
         coupons_applied = apply_coupons(cart: consolidated, coupons: coupons)
         clearance_applied = apply_clearance(cart: coupons_applied)
-
+# binding.prys
         expect(self).to receive(:consolidate_cart).with(cart: cart).and_return(consolidated)
         expect(self).to receive(:apply_coupons).with(cart: consolidated, coupons: coupons).and_return(coupons_applied)
         expect(self).to receive(:apply_clearance).with(cart: coupons_applied).and_return(clearance_applied)
@@ -239,7 +240,7 @@ describe "Grocer" do
         consolidated = consolidate_cart(cart: cart)
         coupons_applied = apply_coupons(cart: consolidated, coupons: coupons)
         clearance_applied = apply_clearance(cart: coupons_applied)
-
+# binding.pry
         expect(self).to receive(:consolidate_cart).with(cart: cart).and_return(consolidated)
         expect(self).to receive(:apply_coupons).with(cart: consolidated, coupons: coupons).and_return(coupons_applied)
         expect(self).to receive(:apply_clearance).with(cart: coupons_applied).and_return(clearance_applied)
@@ -257,6 +258,7 @@ describe "Grocer" do
       it "calls on #consolidate_cart before calculating the total for two identical items" do
         beets = find_item('BEETS')
         cart = Array.new(2, beets)
+        # binding.pry
         result = consolidate_cart(cart: cart)
         expect(self).to receive(:consolidate_cart).with(cart: cart).and_return(result)
         expect(checkout(cart: cart, coupons: [])).to eq(5.00)
